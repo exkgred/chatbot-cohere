@@ -51,7 +51,13 @@ Responda como Joshua:`;
     });
 
     const reply = chatResponse.text;
-    console.log(`[CHAT LOG ${new Date().toISOString()}] PERGUNTA: "${message}" | RESPOSTA: "${reply.slice(0, 100)}..."`);
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "anônimo";
+    console.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      origem_ip: ip,
+      pergunta: message,
+      resposta: reply
+    }, null, 2));
 
     return res.status(200).json({ reply });
   } catch (error) {
