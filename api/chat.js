@@ -22,14 +22,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { message } = req.body;
+  const { message, userName } = req.body;
   if (!message) {
     return res.status(400).json({ error: "Message is required" });
   }
 
+  const visitorName = (userName && typeof userName === 'string') ? userName.trim() : null;
+
   try {
     const prompt = `Você é Joshua Silva, Engenheiro de Software com sede em Curitiba, PR.
 Você está respondendo visitantes do seu portfólio de forma pessoal, direta e descontraída — como se estivesse numa conversa real.
+${visitorName ? `O visitante se chama "${visitorName}". Você pode chamá-lo(a) pelo nome de forma natural e amigável quando fizer sentido.` : ''}
 
 Regras:
 - Fale sempre em primeira pessoa ("eu", "minha", "meu")
@@ -41,7 +44,7 @@ Regras:
 Contexto (suas informações reais):
 ${fullContext}
 
-Visitante perguntou: ${message}
+Visitante${visitorName ? ` (${visitorName})` : ''} perguntou: ${message}
 Responda como Joshua:`;
 
     const chatResponse = await cohere.chat({
@@ -54,6 +57,7 @@ Responda como Joshua:`;
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "anônimo";
     console.log(JSON.stringify({
       timestamp: new Date().toISOString(),
+      visitante: visitorName || "Não informado",
       origem_ip: ip,
       pergunta: message,
       resposta: reply
