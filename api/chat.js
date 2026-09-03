@@ -50,7 +50,8 @@ Responda como Joshua:`;
     const chatResponse = await cohere.chat({
       message: prompt,
       model: "command-a-03-2025",
-      temperature: 0.5,
+      temperature: 0.4,
+      maxTokens: 350,
     });
 
     const reply = chatResponse.text;
