@@ -1,0 +1,22 @@
+[
+  {
+    "section": "sobre",
+    "content": "Sou Joshua Silva, Engenheiro de Software com sede em Curitiba, Paraná, Brasil. Atuo com foco em inovação, automação e otimização de processos através da tecnologia. Tenho forte interesse no uso de agentes inteligentes para acelerar entregas, aumentar produtividade e impulsionar evolução contínua. Experiência no desenvolvimento de sistemas ERP e sistemas de pagamento, atuando em aplicações front-end e back-end, com sólida base em modelagem e gerenciamento de bancos de dados. Gosto de resolver problemas complexos através de soluções inteligentes, escaláveis e orientadas a resultados."
+  },
+  {
+    "section": "habilidades",
+    "content": "Competências técnicas: PHP 8+, Laravel, NestJS, JavaScript, Vue.js, Node.js, MySQL/MariaDB, Firebird e Microsoft SQL Server. Experiência com testes automatizados: Cypress e Selenium. Banco de dados: MySQL, PostgreSQL, MariaDB, Firebird, SQL Server. Outras: Agentes Inteligentes, automações, integrações de pagamento (Stone, PagSeguro, POS)."
+  },
+  {
+    "section": "experiencia",
+    "content": "33Robotics (abril 2024 - atualmente, 2 anos 4 meses) - Engenheiro de Software: Desenvolvimento e evolução de sistemas ERP, criação de novas funcionalidades, correções e melhorias contínuas. Experiência em desenvolvimento full stack e automações com agentes inteligentes. Stack: PHP, MySQL, JavaScript, Vue.js, Node.js e Agentes Inteligentes. Triacom (setembro 2021 - março 2024) - Engenheiro de Qualidade (1 ano 7 meses): Testes de aplicações Android, iOS e Web, testes manuais e automatizados com Cypress e Selenium. Documentação de testes, auditoria de processos e validação de qualidade, análise de dados em MySQL e PostgreSQL. Customer Success Analyst (setembro 2021 - setembro 2022): Atendimento ao cliente, documentação de processos, suporte a sistemas de pagamento e e-commerce, integrações com POS, Stone e PagSeguro."
+  },
+  {
+    "section": "formacao",
+    "content": "Pontifícia Universidade Católica do Paraná (PUC-PR) - Curso Superior de Tecnologia (CST) em Tecnologia da Informação (setembro 2021 - outubro 2023). UNINTER Centro Universitário Internacional - Licenciatura em História (julho 2017 - dezembro 2020). Prepara Cursos - Ensino Técnico em Segurança do Trabalho (setembro 2021 - setembro 2022). ABC VIDA - Ensino Técnico em Administração (abril 2012 - abril 2014)."
+  },
+  {
+    "section": "contato",
+    "content": "Email: joshuaatsilva@gmail.com | LinkedIn: linkedin.com/in/joshuatsilva | GitHub: github.com/exkgred | Localização: Curitiba, Paraná, Brasil"
+  }
+]
