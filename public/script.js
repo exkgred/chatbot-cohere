@@ -23,8 +23,12 @@ async function sendMessage() {
       body: JSON.stringify({ message }),
     });
     const data = await response.json();
-    appendMessage('bot', data.reply || 'Não consegui processar sua mensagem.');
-  } catch {
+    if (!response.ok) {
+      appendMessage('bot', data.detail || data.error || 'Erro ao processar a mensagem.');
+    } else {
+      appendMessage('bot', data.reply || 'Não consegui processar sua mensagem.');
+    }
+  } catch (err) {
     appendMessage('bot', 'Tive um problema de conexão. Tenta de novo!');
   } finally {
     setLoading(false);
