@@ -1,18 +1,20 @@
-document.getElementById('send-btn').addEventListener('click', sendMessage);
-document.getElementById('user-input').addEventListener('keypress', (e) => {
+const sendBtn = document.getElementById('send-btn');
+const userInput = document.getElementById('user-input');
+const chatBox = document.getElementById('chat-box');
+const typing = document.getElementById('typing');
+
+sendBtn.addEventListener('click', sendMessage);
+userInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
 
 async function sendMessage() {
-  const input = document.getElementById('user-input');
-  const btn = document.getElementById('send-btn');
-  const message = input.value.trim();
+  const message = userInput.value.trim();
   if (!message) return;
 
   appendMessage('user', message);
-  input.value = '';
-  btn.disabled = true;
-  btn.textContent = '...';
+  userInput.value = '';
+  setLoading(true);
 
   try {
     const response = await fetch('/api/chat', {
@@ -21,20 +23,37 @@ async function sendMessage() {
       body: JSON.stringify({ message }),
     });
     const data = await response.json();
-    appendMessage('bot', data.reply || 'Erro ao processar.');
-  } catch (error) {
-    appendMessage('bot', 'Erro de conexão. Tente novamente.');
+    appendMessage('bot', data.reply || 'Não consegui processar sua mensagem.');
+  } catch {
+    appendMessage('bot', 'Tive um problema de conexão. Tenta de novo!');
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Enviar';
+    setLoading(false);
   }
 }
 
 function appendMessage(sender, text) {
-  const chatBox = document.getElementById('chat-box');
-  const msgDiv = document.createElement('div');
-  msgDiv.classList.add('message', sender);
-  msgDiv.textContent = text;
-  chatBox.appendChild(msgDiv);
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('message', sender);
+
+  if (sender === 'bot') {
+    const avatar = document.createElement('div');
+    avatar.classList.add('msg-avatar');
+    avatar.textContent = 'JS';
+    wrapper.appendChild(avatar);
+  }
+
+  const bubble = document.createElement('div');
+  bubble.classList.add('msg-bubble');
+  bubble.textContent = text;
+  wrapper.appendChild(bubble);
+
+  chatBox.appendChild(wrapper);
   chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function setLoading(isLoading) {
+  sendBtn.disabled = isLoading;
+  userInput.disabled = isLoading;
+  typing.style.display = isLoading ? 'flex' : 'none';
+  if (isLoading) chatBox.scrollTop = chatBox.scrollHeight;
 }
