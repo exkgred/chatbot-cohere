@@ -1,11 +1,17 @@
 import { CohereClient } from "cohere-ai";
-import { createRequire } from "module";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
-const require = createRequire(import.meta.url);
-const knowledge = require("../data/knowledge.json");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const knowledge = JSON.parse(
+  readFileSync(join(__dirname, "../data/knowledge.json"), "utf-8")
+);
 
 const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY, // variável de ambiente no Vercel
+  token: process.env.COHERE_API_KEY,
 });
 
 export default async function handler(req, res) {
@@ -50,8 +56,8 @@ export default async function handler(req, res) {
       .join("\n\n");
 
     // 4. Prompt com contexto
-    const prompt = `Você é um assistente virtual do portfólio de Joshua Silva.
-Responda APENAS com base no contexto fornecido abaixo.
+    const prompt = `Você é um assistente virtual do portfólio de Joshua Silva, Engenheiro de Software.
+Responda de forma clara e amigável, APENAS com base no contexto fornecido abaixo.
 Se a informação não estiver no contexto, diga: "Não encontrei essa informação no meu portfólio."
 
 Contexto:
@@ -66,10 +72,10 @@ Pergunta: ${message}`;
       temperature: 0.3,
     });
 
-    res.status(200).json({ reply: chatResponse.text });
+    return res.status(200).json({ reply: chatResponse.text });
   } catch (error) {
-    console.error("Erro na API:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Erro na API:", error?.message || error);
+    return res.status(500).json({ error: "Internal server error", detail: error?.message });
   }
 }
 
