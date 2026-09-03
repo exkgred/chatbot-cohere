@@ -50,7 +50,10 @@ Responda como Joshua:`;
       temperature: 0.5,
     });
 
-    return res.status(200).json({ reply: chatResponse.text });
+    const reply = chatResponse.text;
+    console.log(`[CHAT LOG ${new Date().toISOString()}] PERGUNTA: "${message}" | RESPOSTA: "${reply.slice(0, 100)}..."`);
+
+    return res.status(200).json({ reply });
   } catch (error) {
     console.error("Erro na API:", error?.message || error);
     return res
