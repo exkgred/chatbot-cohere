@@ -10,6 +10,9 @@ const knowledge = JSON.parse(
   readFileSync(join(__dirname, "../data/knowledge.json"), "utf-8")
 );
 
+// Monta o contexto completo uma única vez (sem embeddings)
+const fullContext = knowledge.map((k) => k.content).join("\n\n");
+
 const cohere = new CohereClient({
   token: process.env.COHERE_API_KEY,
 });
@@ -25,63 +28,33 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Embedding da pergunta
-    const embedResponse = await cohere.embed({
-      texts: [message],
-      model: "embed-multilingual-v3.0",
-      inputType: "search_query",
-    });
-    const questionEmbedding = embedResponse.embeddings[0];
+    const prompt = `Você é Joshua Silva, Engenheiro de Software com sede em Curitiba, PR.
+Você está respondendo visitantes do seu portfólio de forma pessoal, direta e descontraída — como se estivesse numa conversa real.
 
-    // 2. Calcula similaridade com cada seção
-    const scoredSections = [];
-    for (const item of knowledge) {
-      const sectionEmbed = await cohere.embed({
-        texts: [item.content],
-        model: "embed-multilingual-v3.0",
-        inputType: "search_document",
-      });
-      const similarity = cosineSimilarity(
-        questionEmbedding,
-        sectionEmbed.embeddings[0]
-      );
-      scoredSections.push({ ...item, similarity });
-    }
+Regras:
+- Fale sempre em primeira pessoa ("eu", "minha", "meu")
+- Seja breve e objetivo, mas amigável
+- Não use markdown, asteriscos ou listas — escreva em texto corrido natural
+- Se a pergunta não tiver resposta no contexto abaixo, diga de forma natural que não abordou isso ainda, mas que a pessoa pode entrar em contato
+- Nunca invente informações que não estejam no contexto
 
-    // 3. Seleciona as 3 seções mais relevantes
-    const topSections = scoredSections
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 3)
-      .map((s) => s.content)
-      .join("\n\n");
+Contexto (suas informações reais):
+${fullContext}
 
-    // 4. Prompt com contexto
-    const prompt = `Você é um assistente virtual do portfólio de Joshua Silva, Engenheiro de Software.
-Responda de forma clara e amigável, APENAS com base no contexto fornecido abaixo.
-Se a informação não estiver no contexto, diga: "Não encontrei essa informação no meu portfólio."
+Visitante perguntou: ${message}
+Responda como Joshua:`;
 
-Contexto:
-${topSections}
-
-Pergunta: ${message}`;
-
-    // 5. Chamada ao chat da Cohere
     const chatResponse = await cohere.chat({
       message: prompt,
       model: "command-a-03-2025",
-      temperature: 0.3,
+      temperature: 0.5,
     });
 
     return res.status(200).json({ reply: chatResponse.text });
   } catch (error) {
     console.error("Erro na API:", error?.message || error);
-    return res.status(500).json({ error: "Internal server error", detail: error?.message });
+    return res
+      .status(500)
+      .json({ error: "Internal server error", detail: error?.message });
   }
-}
-
-function cosineSimilarity(vecA, vecB) {
-  const dot = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
-  const magA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
-  const magB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
-  return dot / (magA * magB);
 }
