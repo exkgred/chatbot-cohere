@@ -68,7 +68,7 @@ Pergunta: ${message}`;
     // 5. Chamada ao chat da Cohere
     const chatResponse = await cohere.chat({
       message: prompt,
-      model: "command-r",
+      model: "command-a-03-2025",
       temperature: 0.3,
     });
 
