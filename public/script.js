@@ -9,7 +9,11 @@ if (userName) {
   userInput.placeholder = `Pergunte algo para o Joshua, ${userName}...`;
   const initialBubble = chatBox.querySelector('.bot .msg-bubble');
   if (initialBubble) {
-    initialBubble.textContent = `Olá de novo, ${userName}! Sou o Joshua. Pode me perguntar sobre minha experiência, projetos, habilidades ou contato! 😊`;
+    initialBubble.textContent = `Olá de novo, ${userName}!
+
+Sou o Joshua, engenheiro de software em Curitiba. Trabalho com PHP, Laravel, Vue.js, Node.js e NestJS — principalmente ERP, automações e agentes inteligentes.
+
+Pode me perguntar sobre experiência, projetos, stack técnica ou contato. Por onde quer começar?`;
   }
 }
 
@@ -35,7 +39,9 @@ async function sendMessage() {
       setLoading(false);
       appendMessage(
         'bot',
-        `Prazer em te conhecer, ${userName}! Fique à vontade para me perguntar sobre meus projetos (como ERP e automações), habilidades técnicas ou contato. O que gostaria de saber?`
+        `Prazer em te conhecer, ${userName}!
+
+Pode me perguntar sobre meus projetos (ERP, financeiro, faturamento e fiscal), stack técnica, experiência ou formas de contato. Por onde quer começar?`
       );
     }, 500);
     return;
