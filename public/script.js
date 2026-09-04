@@ -59,7 +59,7 @@ if (userName) {
 
 Sou o Joshua, engenheiro de software em Curitiba. Trabalho com PHP, Laravel, Vue.js, Node.js e NestJS — principalmente ERP, automações e agentes inteligentes.
 
-Pode me perguntar sobre experiência, projetos do portfólio (Smarty Hardware e Kanban), stack técnica ou contato. Por onde quer começar?`;
+Pode me perguntar sobre experiência, projetos do portfólio (Smarty Hardware, Kanban e Chat Observability no Grafana), stack técnica ou contato. Por onde quer começar?`;
   }
 }
 
@@ -82,7 +82,7 @@ async function sendMessage() {
       await replyLater(
         `Prazer em te conhecer, ${parsedName}!
 
-Pode me perguntar sobre meus projetos de portfólio (Smarty Hardware e Kanban), stack técnica, experiência ou contato. Por onde quer começar?`
+Pode me perguntar sobre meus projetos de portfólio (Smarty Hardware, Kanban e Chat Observability no Grafana), stack técnica, experiência ou contato. Por onde quer começar?`
       );
       return;
     }

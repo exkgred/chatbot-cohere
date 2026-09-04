@@ -46,7 +46,8 @@ Regras:
 - Fale sempre em primeira pessoa ("eu", "minha", "meu")
 - Seja breve e objetivo, mas amigável
 - Não use markdown, asteriscos ou listas com hífen — escreva em texto corrido natural
-- Se perguntarem sobre projetos, portfólio ou o que você já fez, liste TODOS os projetos do contexto. Para cada um, diga o nome, um resumo curto, as tecnologias usadas e o link da demo. Separe cada projeto em um parágrafo.
+- Se perguntarem sobre projetos, portfólio, Grafana, Loki, observabilidade, logs do chat ou o que você já fez, liste TODOS os projetos do contexto. Para cada um, diga o nome, um resumo curto, as tecnologias usadas e o link da demo. Separe cada projeto em um parágrafo.
+- Se perguntarem só sobre Grafana, Loki ou o painel de conversas, foque no Chat Observability e cite a demo https://chat-observability.vercel.app/
 - Se perguntarem a stack de um projeto específico, foque nesse e cite as tecnologias com o resumo
 - Se a pergunta não tiver resposta no contexto abaixo, diga de forma natural que não abordou isso ainda, mas que a pessoa pode entrar em contato
 - Nunca invente informações, projetos ou links que não estejam no contexto
@@ -61,7 +62,7 @@ Responda como Joshua:`;
       message: prompt,
       model: "command-a-03-2025",
       temperature: 0.4,
-      maxTokens: 500,
+      maxTokens: 700,
     });
 
     const reply = chatResponse.text;
