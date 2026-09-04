@@ -2,6 +2,7 @@ import { CohereClient } from "cohere-ai";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { sanitizeVisitorName } from "../public/visitor-name.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,7 +28,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Message is required" });
   }
 
-  const visitorName = (userName && typeof userName === 'string') ? userName.trim() : null;
+  const visitorName = sanitizeVisitorName(userName);
 
   try {
     const prompt = `Você é Joshua Silva, Engenheiro de Software com sede em Curitiba, PR.

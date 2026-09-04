@@ -1,9 +1,34 @@
+import {
+  extractVisitorName,
+  isGreetingOnly,
+  parseAsName,
+} from './visitor-name.js';
+
 const sendBtn = document.getElementById('send-btn');
 const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
 const typing = document.getElementById('typing');
 
-let userName = localStorage.getItem('visitor_name') || '';
+const NAME_STORAGE_KEY = 'visitor_name';
+
+let userName = readStoredName();
+let awaitingName = !userName;
+
+function readStoredName() {
+  const stored = localStorage.getItem(NAME_STORAGE_KEY) || '';
+  const parsed = parseAsName(stored);
+  if (stored && !parsed) {
+    localStorage.removeItem(NAME_STORAGE_KEY);
+  }
+  return parsed || '';
+}
+
+function saveVisitorName(name) {
+  userName = name;
+  awaitingName = false;
+  localStorage.setItem(NAME_STORAGE_KEY, name);
+  setAskPlaceholder();
+}
 
 function setAskPlaceholder() {
   const compact = window.matchMedia('(max-width: 640px)').matches;
@@ -33,36 +58,51 @@ async function sendMessage() {
   const text = userInput.value.trim();
   if (!text) return;
 
-  // Primeiro passo: identificar o visitante
-  if (!userName) {
-    userName = text;
-    localStorage.setItem('visitor_name', userName);
-    appendMessage('user', userName);
-    userInput.value = '';
-    setAskPlaceholder();
+  appendMessage('user', text);
+  userInput.value = '';
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      appendMessage(
-        'bot',
-        `Prazer em te conhecer, ${userName}!
+  if (awaitingName) {
+    const parsedName = extractVisitorName(text);
+    if (parsedName) {
+      saveVisitorName(parsedName);
+      await replyLater(
+        `Prazer em te conhecer, ${parsedName}!
 
 Pode me perguntar sobre meus projetos (ERP, financeiro, faturamento e fiscal), stack técnica, experiência ou formas de contato. Por onde quer começar?`
       );
-    }, 500);
-    return;
+      return;
+    }
+
+    if (isGreetingOnly(text)) {
+      await replyLater('Oi! Antes de continuar, como posso te chamar? Pode me dizer seu nome.');
+      return;
+    }
+
+    awaitingName = false;
+    userInput.placeholder = 'Pergunte algo para o Joshua...';
   }
 
-  appendMessage('user', text);
-  userInput.value = '';
-  setLoading(true);
+  await askJoshua(text);
+}
 
+function replyLater(text) {
+  setLoading(true);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      setLoading(false);
+      appendMessage('bot', text);
+      resolve();
+    }, 450);
+  });
+}
+
+async function askJoshua(text) {
+  setLoading(true);
   try {
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, userName }),
+      body: JSON.stringify({ message: text, userName: userName || undefined }),
     });
     const data = await response.json();
     if (!response.ok) {
