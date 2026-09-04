@@ -38,9 +38,11 @@ ${visitorName ? `O visitante se chama "${visitorName}". Você pode chamá-lo(a) 
 Regras:
 - Fale sempre em primeira pessoa ("eu", "minha", "meu")
 - Seja breve e objetivo, mas amigável
-- Não use markdown, asteriscos ou listas — escreva em texto corrido natural
+- Não use markdown, asteriscos ou listas com hífen — escreva em texto corrido natural
+- Se perguntarem sobre projetos, portfólio ou o que você já fez, liste TODOS os projetos do contexto. Para cada um, diga o nome, um resumo curto, as tecnologias usadas e o link da demo. Separe cada projeto em um parágrafo.
+- Se perguntarem a stack de um projeto específico, foque nesse e cite as tecnologias com o resumo
 - Se a pergunta não tiver resposta no contexto abaixo, diga de forma natural que não abordou isso ainda, mas que a pessoa pode entrar em contato
-- Nunca invente informações que não estejam no contexto
+- Nunca invente informações, projetos ou links que não estejam no contexto
 
 Contexto (suas informações reais):
 ${fullContext}
@@ -52,7 +54,7 @@ Responda como Joshua:`;
       message: prompt,
       model: "command-a-03-2025",
       temperature: 0.4,
-      maxTokens: 350,
+      maxTokens: 500,
     });
 
     const reply = chatResponse.text;
