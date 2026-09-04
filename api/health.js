@@ -6,9 +6,16 @@ export default function handler(req, res) {
   }
 
   const url = resolveIngestUrl();
+  let ingestHost = null;
+  try {
+    ingestHost = url ? new URL(url).host : null;
+  } catch {
+    ingestHost = 'invalid';
+  }
   return res.status(200).json({
     status: 'ok',
     ingestUrl: Boolean(url),
+    ingestHost,
     ingestSecret: Boolean(resolveIngestSecret()),
     vercel: Boolean(process.env.VERCEL),
   });
