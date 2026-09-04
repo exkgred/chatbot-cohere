@@ -1,8 +1,10 @@
+import { waitUntil } from "@vercel/functions";
 import { CohereClient } from "cohere-ai";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { sanitizeVisitorName } from "../public/visitor-name.js";
+import { hashOrigin, shipConversationLog } from "../lib/ship-log.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,12 +25,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { message, userName } = req.body;
+  const { message, userName, sessionId } = req.body || {};
   if (!message) {
     return res.status(400).json({ error: "Message is required" });
   }
 
   const visitorName = sanitizeVisitorName(userName);
+  const startedAt = Date.now();
+  const forwarded = req.headers["x-forwarded-for"];
+  const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(",")[0]?.trim()
+    || req.socket.remoteAddress
+    || "anon";
 
   try {
     const prompt = `Você é Joshua Silva, Engenheiro de Software com sede em Curitiba, PR.
@@ -58,18 +65,37 @@ Responda como Joshua:`;
     });
 
     const reply = chatResponse.text;
-    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "anônimo";
-    console.log(JSON.stringify({
+    const logPayload = {
       timestamp: new Date().toISOString(),
-      visitante: visitorName || "Não informado",
-      origem_ip: ip,
+      sessionId: typeof sessionId === "string" ? sessionId : undefined,
+      visitante: visitorName || null,
       pergunta: message,
-      resposta: reply
-    }, null, 2));
+      resposta: reply,
+      latenciaMs: Date.now() - startedAt,
+      modelo: "command-a-03-2025",
+      origemHash: hashOrigin(ip),
+      source: "chatbot",
+    };
+    console.log(JSON.stringify(logPayload, null, 2));
+    waitUntil(shipConversationLog(logPayload));
 
     return res.status(200).json({ reply });
   } catch (error) {
     console.error("Erro na API:", error?.message || error);
+    waitUntil(
+      shipConversationLog({
+        timestamp: new Date().toISOString(),
+        sessionId: typeof sessionId === "string" ? sessionId : undefined,
+        visitante: visitorName || null,
+        pergunta: message,
+        resposta: "",
+        latenciaMs: Date.now() - startedAt,
+        modelo: "command-a-03-2025",
+        origemHash: hashOrigin(ip),
+        erro: error?.message || "Internal server error",
+        source: "chatbot",
+      }),
+    );
     return res
       .status(500)
       .json({ error: "Internal server error", detail: error?.message });

@@ -10,6 +10,20 @@ const chatBox = document.getElementById('chat-box');
 const typing = document.getElementById('typing');
 
 const NAME_STORAGE_KEY = 'visitor_name';
+const SESSION_STORAGE_KEY = 'visitor_session';
+
+function getSessionId() {
+  try {
+    let id = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      sessionStorage.setItem(SESSION_STORAGE_KEY, id);
+    }
+    return id;
+  } catch {
+    return undefined;
+  }
+}
 
 let userName = readStoredName();
 let awaitingName = !userName;
@@ -102,7 +116,11 @@ async function askJoshua(text) {
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, userName: userName || undefined }),
+      body: JSON.stringify({
+        message: text,
+        userName: userName || undefined,
+        sessionId: getSessionId(),
+      }),
     });
     const data = await response.json();
     if (!response.ok) {

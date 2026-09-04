@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vercel/functions": "^3.9.5",
     "cohere-ai": "^8.1.0"
   }
 }
