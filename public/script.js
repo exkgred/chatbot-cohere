@@ -5,8 +5,15 @@ const typing = document.getElementById('typing');
 
 let userName = localStorage.getItem('visitor_name') || '';
 
+function setAskPlaceholder() {
+  const compact = window.matchMedia('(max-width: 640px)').matches;
+  userInput.placeholder = compact
+    ? `Pergunte algo, ${userName}...`
+    : `Pergunte algo para o Joshua, ${userName}...`;
+}
+
 if (userName) {
-  userInput.placeholder = `Pergunte algo para o Joshua, ${userName}...`;
+  setAskPlaceholder();
   const initialBubble = chatBox.querySelector('.bot .msg-bubble');
   if (initialBubble) {
     initialBubble.textContent = `Olá de novo, ${userName}!
@@ -32,7 +39,7 @@ async function sendMessage() {
     localStorage.setItem('visitor_name', userName);
     appendMessage('user', userName);
     userInput.value = '';
-    userInput.placeholder = `Pergunte algo para o Joshua, ${userName}...`;
+    setAskPlaceholder();
 
     setLoading(true);
     setTimeout(() => {
