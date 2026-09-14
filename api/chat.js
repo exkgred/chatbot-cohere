@@ -1,4 +1,3 @@
-import { waitUntil } from "@vercel/functions";
 import { CohereClient } from "cohere-ai";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
@@ -80,25 +79,23 @@ Responda como Joshua:`;
       source: "chatbot",
     };
     console.log(JSON.stringify(logPayload, null, 2));
-    waitUntil(shipConversationLog(logPayload));
+    await shipConversationLog(logPayload);
 
     return res.status(200).json({ reply });
   } catch (error) {
     console.error("Erro na API:", error?.message || error);
-    waitUntil(
-      shipConversationLog({
-        timestamp: new Date().toISOString(),
-        sessionId: typeof sessionId === "string" ? sessionId : undefined,
-        visitante: visitorName || null,
-        pergunta: message,
-        resposta: "",
-        latenciaMs: Date.now() - startedAt,
-        modelo: "command-a-03-2025",
-        origemHash: hashOrigin(ip),
-        erro: error?.message || "Internal server error",
-        source: "chatbot",
-      }),
-    );
+    await shipConversationLog({
+      timestamp: new Date().toISOString(),
+      sessionId: typeof sessionId === "string" ? sessionId : undefined,
+      visitante: visitorName || null,
+      pergunta: message,
+      resposta: "",
+      latenciaMs: Date.now() - startedAt,
+      modelo: "command-a-03-2025",
+      origemHash: hashOrigin(ip),
+      erro: error?.message || "Internal server error",
+      source: "chatbot",
+    });
     return res
       .status(500)
       .json({ error: "Internal server error", detail: error?.message });
