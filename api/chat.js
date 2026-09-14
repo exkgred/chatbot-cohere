@@ -1,3 +1,4 @@
+import { waitUntil } from "@vercel/functions";
 import { CohereClient } from "cohere-ai";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
@@ -19,6 +20,15 @@ const cohere = new CohereClient({
   token: process.env.COHERE_API_KEY,
 });
 
+function persistLog(payload) {
+  const task = shipConversationLog(payload);
+  waitUntil(task);
+  return Promise.race([
+    task,
+    new Promise((resolve) => setTimeout(resolve, 6000)),
+  ]);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -35,6 +45,22 @@ export default async function handler(req, res) {
   const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(",")[0]?.trim()
     || req.socket.remoteAddress
     || "anon";
+
+  if (req.body?.logOnly) {
+    const reply = typeof req.body.reply === "string" ? req.body.reply : "";
+    await shipConversationLog({
+      timestamp: new Date().toISOString(),
+      sessionId: typeof sessionId === "string" ? sessionId : undefined,
+      visitante: visitorName || null,
+      pergunta: message,
+      resposta: reply,
+      latenciaMs: Date.now() - startedAt,
+      modelo: "local",
+      origemHash: hashOrigin(ip),
+      source: "chatbot",
+    });
+    return res.status(200).json({ ok: true });
+  }
 
   try {
     const prompt = `Você é Joshua Silva, Engenheiro de Software com sede em Curitiba, PR.
@@ -79,12 +105,12 @@ Responda como Joshua:`;
       source: "chatbot",
     };
     console.log(JSON.stringify(logPayload, null, 2));
-    await shipConversationLog(logPayload);
+    await persistLog(logPayload);
 
     return res.status(200).json({ reply });
   } catch (error) {
     console.error("Erro na API:", error?.message || error);
-    await shipConversationLog({
+    await persistLog({
       timestamp: new Date().toISOString(),
       sessionId: typeof sessionId === "string" ? sessionId : undefined,
       visitante: visitorName || null,

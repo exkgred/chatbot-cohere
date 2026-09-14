@@ -68,6 +68,20 @@ userInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
 
+function shipLocalTurn(pergunta, resposta) {
+  return fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: pergunta,
+      reply: resposta,
+      userName: userName || undefined,
+      sessionId: getSessionId(),
+      logOnly: true,
+    }),
+  }).catch(() => {});
+}
+
 async function sendMessage() {
   const text = userInput.value.trim();
   if (!text) return;
@@ -79,16 +93,16 @@ async function sendMessage() {
     const parsedName = extractVisitorName(text);
     if (parsedName) {
       saveVisitorName(parsedName);
-      await replyLater(
-        `Prazer em te conhecer, ${parsedName}!
+      const greeting = `Prazer em te conhecer, ${parsedName}!
 
-Pode me perguntar sobre meus projetos de portfólio (VendaCore ERP, Smarty Hardware, Kanban e Chat Observability), como cada um foi construído, stack técnica, experiência ou contato. Por onde quer começar?`
-      );
+Pode me perguntar sobre meus projetos de portfólio (VendaCore ERP, Smarty Hardware, Kanban e Chat Observability), como cada um foi construído, stack técnica, experiência ou contato. Por onde quer começar?`;
+      await Promise.all([shipLocalTurn(text, greeting), replyLater(greeting)]);
       return;
     }
 
     if (isGreetingOnly(text)) {
-      await replyLater('Oi! Antes de continuar, como posso te chamar? Pode me dizer seu nome.');
+      const retry = 'Oi! Antes de continuar, como posso te chamar? Pode me dizer seu nome.';
+      await Promise.all([shipLocalTurn(text, retry), replyLater(retry)]);
       return;
     }
 
