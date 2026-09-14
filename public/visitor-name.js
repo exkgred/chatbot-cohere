@@ -1,10 +1,20 @@
 const NAME_PARTICLES = new Set(['da', 'de', 'do', 'das', 'dos', 'e', 'di', 'du', 'van', 'von']);
-const GREETINGS = new Set([
+const GREETINGS = [
+  'ola tudo bem',
+  'ola td bem',
+  'oi tudo bem',
+  'boa madrugada',
+  'bom dia',
+  'boa tarde',
+  'boa noite',
+  'tudo bem',
+  'tudo bom',
+  'td bem',
+  'td bom',
+  'eae blz',
   'ola',
   'oi',
   'oie',
-  'oii',
-  'oiii',
   'hello',
   'hi',
   'hey',
@@ -14,23 +24,12 @@ const GREETINGS = new Set([
   'iae',
   'salve',
   'opa',
-  'opaa',
   'fala',
-  'bom dia',
-  'boa tarde',
-  'boa noite',
-  'boa madrugada',
-  'tudo bem',
-  'tudo bom',
-  'td bem',
-  'td bom',
   'blz',
   'beleza',
-  'eae blz',
-  'oi tudo bem',
-  'ola tudo bem',
-  'ola td bem',
-]);
+];
+const GREETING_SET = new Set(GREETINGS);
+const BOT_ALIASES = new Set(['joshua', 'joshua silva', 'josh', 'js']);
 const NOT_NAMES = new Set([
   'sim',
   'nao',
@@ -75,10 +74,6 @@ export function normalizeText(text) {
     .trim();
 }
 
-function isGreetingLike(normalized) {
-  return GREETINGS.has(normalized) || ELONGATED_GREETING.test(normalized);
-}
-
 function collapseGreetingToken(token) {
   if (/^oi+e*$/.test(token)) return 'oi';
   if (/^ola+$/.test(token)) return 'ola';
@@ -89,6 +84,82 @@ function collapseGreetingToken(token) {
   if (/^eai+$/.test(token)) return 'eai';
   if (/^opa+$/.test(token)) return 'opa';
   return token;
+}
+
+function collapseTokens(normalized) {
+  return normalized
+    .split(' ')
+    .filter(Boolean)
+    .map(collapseGreetingToken)
+    .join(' ');
+}
+
+function isGreetingLike(normalized) {
+  const collapsed = collapseTokens(normalized);
+  return GREETING_SET.has(collapsed) || ELONGATED_GREETING.test(collapsed);
+}
+
+function matchPrefix(haystack, prefixes) {
+  return prefixes.find((item) => haystack === item || haystack.startsWith(`${item} `));
+}
+
+function stripPrefixList(normalized, prefixes) {
+  let rest = collapseTokens(normalized);
+  let stripped = false;
+  for (let i = 0; i < 8 && rest; i += 1) {
+    const match = matchPrefix(rest, prefixes);
+    if (!match) break;
+    rest = rest.slice(match.length).trim();
+    stripped = true;
+  }
+  return { rest, stripped };
+}
+
+function stripLeadingGreetings(normalized) {
+  return stripPrefixList(normalized, GREETINGS);
+}
+
+function stripBotAlias(normalized) {
+  let rest = collapseTokens(normalized);
+  const aliases = [...BOT_ALIASES].sort((left, right) => right.length - left.length);
+  const match = matchPrefix(rest, aliases);
+  if (!match) return { rest, stripped: false };
+  return { rest: rest.slice(match.length).trim(), stripped: true };
+}
+
+function stripChatNoise(normalized) {
+  let rest = collapseTokens(normalized);
+  let sawGreeting = false;
+  for (let i = 0; i < 8 && rest; i += 1) {
+    const greet = stripLeadingGreetings(rest);
+    if (greet.stripped) {
+      sawGreeting = true;
+      rest = greet.rest;
+      continue;
+    }
+    if (sawGreeting) {
+      const bot = stripBotAlias(rest);
+      if (bot.stripped) {
+        rest = bot.rest;
+        continue;
+      }
+    }
+    break;
+  }
+  return rest;
+}
+
+function containsGreetingPhrase(normalized) {
+  const collapsed = collapseTokens(normalized);
+  if (isGreetingLike(collapsed)) return true;
+  if (stripLeadingGreetings(collapsed).stripped) return true;
+  return GREETINGS.some(
+    (greeting) =>
+      collapsed === greeting ||
+      collapsed.startsWith(`${greeting} `) ||
+      collapsed.endsWith(` ${greeting}`) ||
+      collapsed.includes(` ${greeting} `),
+  );
 }
 
 function titleCaseName(words) {
@@ -116,9 +187,8 @@ export function parseAsName(candidate, { fromPhrase = false } = {}) {
 
   const normalized = normalizeText(cleaned);
   if (!normalized) return null;
-  if (!fromPhrase && isGreetingLike(normalized)) return null;
   if (NOT_NAMES.has(normalized)) return null;
-  if (!fromPhrase && words.some((word) => isGreetingLike(normalizeText(word)))) return null;
+  if (!fromPhrase && containsGreetingPhrase(normalized)) return null;
 
   const nameWord = /^[\p{L}][\p{L}'’-]*$/u;
   const allWordsValid = words.every((word) => {
@@ -139,25 +209,25 @@ export function extractVisitorName(text) {
     if (fromPhrase) return fromPhrase;
   }
 
-  const withoutGreeting = raw
-    .replace(/^(ol[aá]+|oi+e*|hello+|hi+|hey+|eae+|eai+|opa+|fala+|salve+)[,!.\s]+/i, '')
-    .trim();
+  if (/[?]/.test(raw)) return null;
 
-  if (withoutGreeting && withoutGreeting !== raw) {
-    return parseAsName(withoutGreeting);
+  const remaining = stripChatNoise(normalizeText(raw));
+  if (!remaining) return null;
+  if (/^(quais|qual|como|onde|quando|quem|porque|por que|o que|oq)\b/.test(remaining)) {
+    return null;
   }
 
-  return parseAsName(raw);
+  return parseAsName(remaining);
 }
 
 export function isGreetingOnly(text) {
   const normalized = normalizeText(String(text || ''));
   if (!normalized) return false;
 
-  const tokens = normalized.split(' ').map(collapseGreetingToken);
-  const collapsed = tokens.join(' ');
-  if (isGreetingLike(collapsed) || GREETINGS.has(collapsed)) return true;
+  const remaining = stripChatNoise(normalized);
+  if (!remaining) return true;
 
+  const tokens = remaining.split(' ').map(collapseGreetingToken);
   return tokens.length > 0 && tokens.every((token) => isGreetingLike(token) || NOT_NAMES.has(token));
 }
 
