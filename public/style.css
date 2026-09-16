@@ -224,6 +224,83 @@ body {
   white-space: pre-line;
 }
 
+.msg-bubble.md {
+  white-space: normal;
+}
+
+.msg-bubble.md p {
+  margin: 0;
+}
+
+.msg-bubble.md p + p,
+.msg-bubble.md p + ul,
+.msg-bubble.md p + ol,
+.msg-bubble.md ul + p,
+.msg-bubble.md ol + p,
+.msg-bubble.md pre + p,
+.msg-bubble.md p + pre {
+  margin-top: 0.7em;
+}
+
+.msg-bubble.md ul,
+.msg-bubble.md ol {
+  margin: 0.55em 0 0.15em;
+  padding-left: 1.2em;
+}
+
+.msg-bubble.md li + li {
+  margin-top: 0.25em;
+}
+
+.msg-bubble.md h1,
+.msg-bubble.md h2,
+.msg-bubble.md h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0.15em 0 0.4em;
+}
+
+.msg-bubble.md a {
+  color: #3b6fd4;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+
+.msg-bubble.md a:hover {
+  color: #2b5cc0;
+}
+
+.msg-bubble.md strong {
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.msg-bubble.md code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  background: #e8edf7;
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+.msg-bubble.md pre {
+  margin: 0.7em 0 0.2em;
+  padding: 10px 12px;
+  background: #e8edf7;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.msg-bubble.md pre code {
+  padding: 0;
+  background: none;
+  font-size: 12px;
+  white-space: pre;
+}
+
 /* Bot */
 .message.bot .msg-bubble {
   background: #f4f6fb;

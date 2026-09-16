@@ -3,6 +3,7 @@ import {
   isGreetingOnly,
   parseAsName,
 } from './visitor-name.js';
+import { renderMarkdown } from './markdown.js';
 
 const sendBtn = document.getElementById('send-btn');
 const userInput = document.getElementById('user-input');
@@ -55,11 +56,12 @@ if (userName) {
   setAskPlaceholder();
   const initialBubble = chatBox.querySelector('.bot .msg-bubble');
   if (initialBubble) {
-    initialBubble.textContent = `Olá de novo, ${userName}!
+    initialBubble.classList.add('md');
+    initialBubble.innerHTML = renderMarkdown(`Olá de novo, ${userName}!
 
 Sou o Joshua, engenheiro de software em Curitiba. Trabalho com PHP, Laravel, Vue.js, Node.js e NestJS — principalmente ERP, automações e agentes inteligentes.
 
-Pode me perguntar sobre experiência, projetos do portfólio (VendaCore ERP, Smarty Hardware, Kanban, Chat Observability e Discador Zenvia), como cada um foi construído, stack técnica ou contato. Por onde quer começar?`;
+Pode me perguntar sobre experiência, projetos do portfólio (VendaCore ERP, Smarty Hardware, Kanban, Chat Observability e Discador Zenvia), como cada um foi construído, stack técnica ou contato. Por onde quer começar?`);
   }
 }
 
@@ -162,7 +164,12 @@ function appendMessage(sender, text) {
 
   const bubble = document.createElement('div');
   bubble.classList.add('msg-bubble');
-  bubble.textContent = text;
+  if (sender === 'bot') {
+    bubble.classList.add('md');
+    bubble.innerHTML = renderMarkdown(text);
+  } else {
+    bubble.textContent = text;
+  }
   wrapper.appendChild(bubble);
 
   chatBox.appendChild(wrapper);
