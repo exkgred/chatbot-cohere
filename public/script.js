@@ -59,7 +59,7 @@ if (userName) {
 
 Sou o Joshua, engenheiro de software em Curitiba. Trabalho com PHP, Laravel, Vue.js, Node.js e NestJS — principalmente ERP, automações e agentes inteligentes.
 
-Pode me perguntar sobre experiência, projetos do portfólio (VendaCore ERP, Smarty Hardware, Kanban e Chat Observability), como cada um foi construído, stack técnica ou contato. Por onde quer começar?`;
+Pode me perguntar sobre experiência, projetos do portfólio (VendaCore ERP, Smarty Hardware, Kanban, Chat Observability e Discador Zenvia), como cada um foi construído, stack técnica ou contato. Por onde quer começar?`;
   }
 }
 
@@ -95,7 +95,7 @@ async function sendMessage() {
       saveVisitorName(parsedName);
       const greeting = `Prazer em te conhecer, ${parsedName}!
 
-Pode me perguntar sobre meus projetos de portfólio (VendaCore ERP, Smarty Hardware, Kanban e Chat Observability), como cada um foi construído, stack técnica, experiência ou contato. Por onde quer começar?`;
+Pode me perguntar sobre meus projetos de portfólio (VendaCore ERP, Smarty Hardware, Kanban, Chat Observability e Discador Zenvia), como cada um foi construído, stack técnica, experiência ou contato. Por onde quer começar?`;
       await Promise.all([shipLocalTurn(text, greeting), replyLater(greeting)]);
       return;
     }
