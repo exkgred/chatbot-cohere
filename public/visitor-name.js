@@ -18,6 +18,12 @@ const GREETINGS = [
   'hello',
   'hi',
   'hey',
+  'good morning',
+  'good afternoon',
+  'good evening',
+  'how are you',
+  'hows it going',
+  "how's it going",
   'yo',
   'eae',
   'eai',
@@ -33,6 +39,11 @@ const BOT_ALIASES = new Set(['joshua', 'joshua silva', 'josh', 'js']);
 const NOT_NAMES = new Set([
   'sim',
   'nao',
+  'yes',
+  'no',
+  'please',
+  'got it',
+  'sure',
   'ok',
   'okay',
   'valeu',
@@ -60,7 +71,7 @@ const NOT_NAMES = new Set([
   'eu',
   'voce',
 ]);
-const NAME_FROM_PHRASE = /(?:meu nome [eéè]|me chamo|pode me chamar de|me chama de|chamo-me|sou [oa]|eu sou [oa]?)\s+(.+)/i;
+const NAME_FROM_PHRASE = /(?:meu nome [eéè]|me chamo|pode me chamar de|me chama de|chamo-me|sou [oa]|eu sou [oa]?|my name is|i(?:'| a)?m|you can call me|call me)\s+(.+)/i;
 
 const ELONGATED_GREETING = /^(oi+e*|ola+|hey+|hi+|hello+|eae+|eai+|opa+|iae+|yo+|salve+|fala+)$/;
 
@@ -213,7 +224,7 @@ export function extractVisitorName(text) {
 
   const remaining = stripChatNoise(normalizeText(raw));
   if (!remaining) return null;
-  if (/^(quais|qual|como|onde|quando|quem|porque|por que|o que|oq)\b/.test(remaining)) {
+  if (/^(quais|qual|como|onde|quando|quem|porque|por que|o que|oq|what|how|where|when|who|why|which)\b/.test(remaining)) {
     return null;
   }
 

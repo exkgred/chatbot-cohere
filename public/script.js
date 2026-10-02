@@ -3,6 +3,7 @@ import {
   isGreetingOnly,
   parseAsName,
 } from './visitor-name.js';
+import { detectLang, persistLang, t } from './i18n.js';
 import { renderMarkdown } from './markdown.js';
 
 const sendBtn = document.getElementById('send-btn');
@@ -12,6 +13,14 @@ const typing = document.getElementById('typing');
 
 const NAME_STORAGE_KEY = 'visitor_name';
 const SESSION_STORAGE_KEY = 'visitor_session';
+
+let lang = detectLang();
+let userName = readStoredName();
+let awaitingName = !userName;
+
+function copy() {
+  return t(lang);
+}
 
 function getSessionId() {
   try {
@@ -25,9 +34,6 @@ function getSessionId() {
     return undefined;
   }
 }
-
-let userName = readStoredName();
-let awaitingName = !userName;
 
 function readStoredName() {
   const stored = localStorage.getItem(NAME_STORAGE_KEY) || '';
@@ -46,41 +52,106 @@ function saveVisitorName(name) {
 }
 
 function setAskPlaceholder() {
+  const strings = copy();
   const compact = window.matchMedia('(max-width: 640px)').matches;
-  userInput.placeholder = compact
-    ? `Pergunte algo, ${userName}...`
-    : `Pergunte algo para o Joshua, ${userName}...`;
-}
-
-if (userName) {
-  setAskPlaceholder();
-  const initialBubble = chatBox.querySelector('.bot .msg-bubble');
-  if (initialBubble) {
-    initialBubble.classList.add('md');
-    initialBubble.innerHTML = renderMarkdown(`Olá de novo, ${userName}!
-
-Sou o Joshua, engenheiro de software em Curitiba. Trabalho com PHP, Laravel, Vue.js, Node.js e NestJS — principalmente ERP, automações e agentes inteligentes.
-
-Pode me perguntar sobre experiência, projetos do portfólio (VendaCore ERP, Smarty Hardware, Kanban, Chat Observability e Discador Zenvia), como cada um foi construído, stack técnica ou contato. Por onde quer começar?`);
+  if (awaitingName) {
+    userInput.placeholder = strings.placeholderName;
+    return;
   }
+  if (userName) {
+    userInput.placeholder = strings.placeholderAsk(userName, compact);
+    return;
+  }
+  userInput.placeholder = strings.placeholderAskAnon;
 }
+
+function hasUserMessages() {
+  return Boolean(chatBox.querySelector('.message.user'));
+}
+
+function refreshWelcomeBubble() {
+  if (hasUserMessages()) return;
+  const initialBubble = chatBox.querySelector('.bot .msg-bubble');
+  if (!initialBubble) return;
+  const strings = copy();
+  const text = userName ? strings.welcomeBack(userName) : strings.welcome;
+  initialBubble.classList.add('md');
+  initialBubble.innerHTML = renderMarkdown(text);
+}
+
+function applyLanguage() {
+  const strings = copy();
+  document.documentElement.lang = strings.htmlLang;
+  document.title = strings.title;
+
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.getAttribute('data-i18n');
+    const value = strings[key];
+    if (typeof value === 'string') el.textContent = value;
+  });
+
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-title');
+    const value = strings[key];
+    if (typeof value === 'string') el.setAttribute('title', value);
+  });
+
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-aria');
+    const value = strings[key];
+    if (typeof value === 'string') el.setAttribute('aria-label', value);
+  });
+
+  sendBtn.setAttribute('aria-label', strings.sendAria);
+
+  document.querySelectorAll('.lang-switch [data-lang]').forEach((btn) => {
+    btn.setAttribute('aria-pressed', String(btn.getAttribute('data-lang') === lang));
+  });
+
+  setAskPlaceholder();
+  refreshWelcomeBubble();
+}
+
+function setLanguage(next) {
+  lang = persistLang(next);
+  applyLanguage();
+}
+
+function bindLangSwitch() {
+  document.querySelectorAll('.lang-switch [data-lang]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const next = btn.getAttribute('data-lang');
+      if (next && next !== lang) setLanguage(next);
+    });
+  });
+}
+
+applyLanguage();
+bindLangSwitch();
 
 sendBtn.addEventListener('click', sendMessage);
 userInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
 
+function chatPayload(extra = {}) {
+  return {
+    userName: userName || undefined,
+    sessionId: getSessionId(),
+    language: lang,
+    ...extra,
+  };
+}
+
 function shipLocalTurn(pergunta, resposta) {
   return fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+    body: JSON.stringify(chatPayload({
       message: pergunta,
       reply: resposta,
-      userName: userName || undefined,
-      sessionId: getSessionId(),
       logOnly: true,
-    }),
+    })),
   }).catch(() => {});
 }
 
@@ -95,21 +166,19 @@ async function sendMessage() {
     const parsedName = extractVisitorName(text);
     if (parsedName) {
       saveVisitorName(parsedName);
-      const greeting = `Prazer em te conhecer, ${parsedName}!
-
-Pode me perguntar sobre meus projetos de portfólio (VendaCore ERP, Smarty Hardware, Kanban, Chat Observability e Discador Zenvia), como cada um foi construído, stack técnica, experiência ou contato. Por onde quer começar?`;
+      const greeting = copy().afterName(parsedName);
       await Promise.all([shipLocalTurn(text, greeting), replyLater(greeting)]);
       return;
     }
 
     if (isGreetingOnly(text)) {
-      const retry = 'Oi! Antes de continuar, como posso te chamar? Pode me dizer seu nome.';
+      const retry = copy().greetingRetry;
       await Promise.all([shipLocalTurn(text, retry), replyLater(retry)]);
       return;
     }
 
     awaitingName = false;
-    userInput.placeholder = 'Pergunte algo para o Joshua...';
+    setAskPlaceholder();
   }
 
   await askJoshua(text);
@@ -127,25 +196,22 @@ function replyLater(text) {
 }
 
 async function askJoshua(text) {
+  const strings = copy();
   setLoading(true);
   try {
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: text,
-        userName: userName || undefined,
-        sessionId: getSessionId(),
-      }),
+      body: JSON.stringify(chatPayload({ message: text })),
     });
     const data = await response.json();
     if (!response.ok) {
-      appendMessage('bot', data.detail || data.error || 'Erro ao processar a mensagem.');
+      appendMessage('bot', data.detail || data.error || strings.errorProcess);
     } else {
-      appendMessage('bot', data.reply || 'Não consegui processar sua mensagem.');
+      appendMessage('bot', data.reply || strings.errorEmpty);
     }
-  } catch (err) {
-    appendMessage('bot', 'Tive um problema de conexão. Tenta de novo!');
+  } catch {
+    appendMessage('bot', strings.errorConn);
   } finally {
     setLoading(false);
   }
