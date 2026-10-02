@@ -1,9 +1,9 @@
 export const LANG_STORAGE_KEY = 'chat_lang';
 
 const PROJECTS_PT =
-  'Átrio, VendaCore ERP, Nexo, Smarty Hardware, Kanban, Chat Observability no Grafana e Discador Zenvia';
+  'Átrio, VendaCore ERP, Nexo, Smarty Hardware, Kanban, Chat Observability no Grafana, Discador Zenvia e Brasa';
 const PROJECTS_EN =
-  'Átrio, VendaCore ERP, Nexo, Smarty Hardware, Kanban, Chat Observability on Grafana, and Discador Zenvia';
+  'Átrio, VendaCore ERP, Nexo, Smarty Hardware, Kanban, Chat Observability on Grafana, Discador Zenvia, and Brasa';
 
 export const STRINGS = {
   pt: {
