@@ -195,20 +195,41 @@ function replyLater(text) {
   });
 }
 
+async function parseReply(response) {
+  const raw = await response.text();
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
+async function requestChat(text) {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(chatPayload({ message: text })),
+  });
+  const data = await parseReply(response);
+  return { ok: response.ok, data };
+}
+
 async function askJoshua(text) {
   const strings = copy();
   setLoading(true);
   try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(chatPayload({ message: text })),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      appendMessage('bot', data.detail || data.error || strings.errorProcess);
+    let result;
+    try {
+      result = await requestChat(text);
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      result = await requestChat(text);
+    }
+    if (!result.ok) {
+      appendMessage('bot', result.data.detail || result.data.error || strings.errorProcess);
     } else {
-      appendMessage('bot', data.reply || strings.errorEmpty);
+      appendMessage('bot', result.data.reply || strings.errorEmpty);
     }
   } catch {
     appendMessage('bot', strings.errorConn);

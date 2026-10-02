@@ -70,6 +70,14 @@ const NOT_NAMES = new Set([
   'test',
   'eu',
   'voce',
+  'nexo',
+  'atrio',
+  'vendacore',
+  'smarty',
+  'kanban',
+  'discador',
+  'grafana',
+  'loki',
 ]);
 const NAME_FROM_PHRASE = /(?:meu nome [eéè]|me chamo|pode me chamar de|me chama de|chamo-me|sou [oa]|eu sou [oa]?|my name is|i(?:'| a)?m|you can call me|call me)\s+(.+)/i;
 
@@ -224,7 +232,7 @@ export function extractVisitorName(text) {
 
   const remaining = stripChatNoise(normalizeText(raw));
   if (!remaining) return null;
-  if (/^(quais|qual|como|onde|quando|quem|porque|por que|o que|oq|what|how|where|when|who|why|which)\b/.test(remaining)) {
+  if (/^(quais|qual|como|onde|quando|quem|porque|por que|o que|oq|what|how|where|when|who|why|which|see|tell|show|speak|talk|fale|fala|conta|conte|explica|explique|mostra|mostre)\b/.test(remaining)) {
     return null;
   }
 
