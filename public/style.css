@@ -52,14 +52,10 @@ body {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4f8ef7, #7c5af7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 1px;
+  object-fit: cover;
+  object-position: center 18%;
+  background: #2d3748;
+  display: block;
   flex-shrink: 0;
   margin-bottom: 4px;
 }
@@ -149,13 +145,10 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4f8ef7, #7c5af7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
+  object-fit: cover;
+  object-position: center 18%;
+  background: #2d3748;
+  display: block;
 }
 
 .chat-header-name {
@@ -202,13 +195,10 @@ body {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4f8ef7, #7c5af7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: #fff;
+  object-fit: cover;
+  object-position: center 18%;
+  background: #2d3748;
+  display: block;
   flex-shrink: 0;
 }
 
@@ -441,7 +431,6 @@ body {
   .avatar {
     width: 52px;
     height: 52px;
-    font-size: 18px;
   }
 
   .profile-name { font-size: 14px; }
@@ -472,7 +461,6 @@ body {
   .avatar {
     width: 40px;
     height: 40px;
-    font-size: 14px;
   }
 
   .profile-name {
@@ -497,7 +485,7 @@ body {
   .link-label { display: none; }
 
   .chat-header { padding: 10px 12px; }
-  .chat-header-avatar { width: 32px; height: 32px; font-size: 11px; }
+  .chat-header-avatar { width: 32px; height: 32px; }
   #chat-box { padding: 10px 12px; }
   .typing-indicator { padding: 0 12px 8px; }
   .msg-bubble { max-width: 85%; font-size: 13px; padding: 9px 12px; }

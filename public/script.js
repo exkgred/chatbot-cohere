@@ -156,9 +156,12 @@ function appendMessage(sender, text) {
   wrapper.classList.add('message', sender);
 
   if (sender === 'bot') {
-    const avatar = document.createElement('div');
+    const avatar = document.createElement('img');
     avatar.classList.add('msg-avatar');
-    avatar.textContent = 'JS';
+    avatar.src = 'joshua.jpg';
+    avatar.alt = '';
+    avatar.width = 30;
+    avatar.height = 30;
     wrapper.appendChild(avatar);
   }
 
